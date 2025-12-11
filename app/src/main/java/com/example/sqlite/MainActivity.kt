@@ -1,6 +1,7 @@
 package com.example.sqlite
 
 import android.content.ContentValues
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.view.View
@@ -32,8 +33,7 @@ class MainActivity : AppCompatActivity() {
             "CREATE TABLE IF NOT EXISTS cadastro (_id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, telefone TEXT)"
         )
 
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
@@ -55,38 +55,106 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun btnUpdateOnClick(view: View) {
+        val id = binding.etCod.text.toString()
+        if (id.isBlank()) {
+            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val register = ContentValues()
         register.put("nome", binding.etNome.text.toString())
         register.put("telefone", binding.etTelefone.text.toString())
 
-        dataBase.update(
+        val numRowsUpdated = dataBase.update(
             "cadastro",
             register,
             "_id = ?",
-            arrayOf(binding.etCod.text.toString())
+            arrayOf(id)
         )
 
-        Toast.makeText(
-            this,
-            "Alteração efetuada com sucesso!",
-            Toast.LENGTH_SHORT
-        ).show()
+        if (numRowsUpdated > 0) {
+            Toast.makeText(
+                this,
+                "Alteração efetuada com sucesso!",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Nenhum registro encontrado com o código informado.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     fun btnDeleteOnClick(view: View) {
-        dataBase.delete(
+        val id = binding.etCod.text.toString()
+        if (id.isBlank()) {
+            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val numRowsDeleted = dataBase.delete(
             "cadastro",
             "_id = ?",
-            arrayOf(binding.etCod.text.toString())
+            arrayOf(id)
         )
 
-        Toast.makeText(
-            this,
-            "Excluido com sucesso!",
-            Toast.LENGTH_SHORT
-        ).show()
+        if (numRowsDeleted > 0) {
+            Toast.makeText(
+                this,
+                "Excluido com sucesso!",
+                Toast.LENGTH_SHORT
+            ).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Nenhum registro encontrado com o código informado.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    fun btnPesquisarOnClick(view: View) {}
+    fun btnSearchOnClick(view: View) {
+        val id = binding.etCod.text.toString()
+        if (id.isBlank()) {
+            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val cursor: Cursor = dataBase.query(
+            "cadastro",
+            null,
+            "_id = ?",
+            arrayOf(id),
+            null,
+            null,
+            null
+        )
+
+        cursor.use { c ->
+            if (c.moveToFirst()) {
+                val nameIndex = c.getColumnIndex("nome")
+                val phoneIndex = c.getColumnIndex("telefone")
+
+                if (nameIndex != -1 && phoneIndex != -1) {
+                    val name = c.getString(nameIndex)
+                    val phone = c.getString(phoneIndex)
+
+                    binding.etNome.setText(name)
+                    binding.etTelefone.setText(phone)
+                } else {
+                    Toast.makeText(this, "Coluna não encontrada.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(
+                    this,
+                    "Registro não encontrado!",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     fun btnListarOnClick(view: View) {}
 }

@@ -67,7 +67,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="btnPesquisarOnClick"
+        android:onClick="btnSearchOnClick"
         android:text="@string/pesquisar" />
 
     <Button
