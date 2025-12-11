@@ -156,5 +156,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun btnListarOnClick(view: View) {}
+    fun btnListarOnClick(view: View) {
+        val cursor: Cursor = dataBase.query(
+            "cadastro",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
+
+        val exit = StringBuilder()
+
+        while (cursor.moveToNext()) {
+            val nameIndex = cursor.getColumnIndex("nome")
+            val idIndex = cursor.getColumnIndex("telefone")
+
+            exit.append("Nome: ${cursor.getString(nameIndex)}\n")
+            exit.append("Telefone: ${cursor.getInt(idIndex)}\n")
+        }
+
+        Toast.makeText(
+            this,
+            exit.toString(),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 }
