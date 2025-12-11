@@ -10,11 +10,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.sqlite.database.DatabaseHandler
 import com.example.sqlite.databinding.ActivityMainBinding
+import com.example.sqlite.entity.Cadastro
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var dataBase: SQLiteDatabase
+    private lateinit var dataBase: DatabaseHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,15 +25,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dataBase = openOrCreateDatabase(
-            "bdfile.sqlite",
-            MODE_PRIVATE,
-            null
-        )
-
-        dataBase.execSQL(
-            "CREATE TABLE IF NOT EXISTS cadastro (_id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, telefone TEXT)"
-        )
+        dataBase = DatabaseHandler(this)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -41,11 +35,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun btnInclusionClick(view: View) {
-        val register = ContentValues()
-        register.put("nome", binding.etNome.text.toString())
-        register.put("telefone", binding.etTelefone.text.toString())
-
-        dataBase.insert("cadastro", null, register)
+        val cadastro = Cadastro(
+            _id = 0,
+            name = binding.etNome.text.toString(),
+            telefone = binding.etTelefone.text.toString()
+        )
+        dataBase.insert(cadastro)
 
         Toast.makeText(
             this,
@@ -57,130 +52,102 @@ class MainActivity : AppCompatActivity() {
     fun btnUpdateOnClick(view: View) {
         val id = binding.etCod.text.toString()
         if (id.isBlank()) {
-            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Por favor, informe o código.",
+                Toast.LENGTH_SHORT).show()
             return
         }
 
-        val register = ContentValues()
-        register.put("nome", binding.etNome.text.toString())
-        register.put("telefone", binding.etTelefone.text.toString())
-
-        val numRowsUpdated = dataBase.update(
-            "cadastro",
-            register,
-            "_id = ?",
-            arrayOf(id)
+        val cadastro = Cadastro(
+            _id = id.toInt(),
+            name = binding.etNome.text.toString(),
+            telefone = binding.etTelefone.text.toString()
         )
 
-        if (numRowsUpdated > 0) {
-            Toast.makeText(
-                this,
-                "Alteração efetuada com sucesso!",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            Toast.makeText(
-                this,
-                "Nenhum registro encontrado com o código informado.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        dataBase.update(cadastro)
+
+        Toast.makeText(
+            this,
+            "Registro alterado com sucesso!",
+            Toast.LENGTH_SHORT
+        )
     }
 
     fun btnDeleteOnClick(view: View) {
         val id = binding.etCod.text.toString()
+
         if (id.isBlank()) {
-            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Por favor, informe o código.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        val numRowsDeleted = dataBase.delete(
-            "cadastro",
-            "_id = ?",
-            arrayOf(id)
-        )
+        dataBase.delete(id.toInt())
 
-        if (numRowsDeleted > 0) {
-            Toast.makeText(
-                this,
-                "Excluido com sucesso!",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            Toast.makeText(
-                this,
-                "Nenhum registro encontrado com o código informado.",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        Toast.makeText(
+            this,
+            "Registro excluído com sucesso!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     fun btnSearchOnClick(view: View) {
         val id = binding.etCod.text.toString()
         if (id.isBlank()) {
-            Toast.makeText(this, "Por favor, informe o código.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Por favor, informe o código.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        val cursor: Cursor = dataBase.query(
-            "cadastro",
-            null,
-            "_id = ?",
-            arrayOf(id),
-            null,
-            null,
-            null
-        )
+        val cadastro = dataBase.search(id.toInt())
 
-        cursor.use { c ->
-            if (c.moveToFirst()) {
-                val nameIndex = c.getColumnIndex("nome")
-                val phoneIndex = c.getColumnIndex("telefone")
-
-                if (nameIndex != -1 && phoneIndex != -1) {
-                    val name = c.getString(nameIndex)
-                    val phone = c.getString(phoneIndex)
-
-                    binding.etNome.setText(name)
-                    binding.etTelefone.setText(phone)
-                } else {
-                    Toast.makeText(this, "Coluna não encontrada.", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                Toast.makeText(
-                    this,
-                    "Registro não encontrado!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        if (cadastro != null) {
+            binding.etNome.setText(cadastro.name)
+            binding.etTelefone.setText(cadastro.telefone)
+        } else {
+            Toast.makeText(
+                this,
+                "Registro não encontrado.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
     fun btnListarOnClick(view: View) {
-        val cursor: Cursor = dataBase.query(
-            "cadastro",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        val cursor: Cursor = dataBase.list()
 
-        val exit = StringBuilder()
+        if (cursor.moveToFirst()) {
+            val stringBuilder = StringBuilder()
+            do {
+                val idIndex = cursor.getColumnIndex("_id")
+                val nameIndex = cursor.getColumnIndex("nome")
+                val phoneIndex = cursor.getColumnIndex("telefone")
 
-        while (cursor.moveToNext()) {
-            val nameIndex = cursor.getColumnIndex("nome")
-            val idIndex = cursor.getColumnIndex("telefone")
+                val id = cursor.getInt(idIndex)
+                val name = cursor.getString(nameIndex)
+                val phone = cursor.getString(phoneIndex)
 
-            exit.append("Nome: ${cursor.getString(nameIndex)}\n")
-            exit.append("Telefone: ${cursor.getInt(idIndex)}\n")
+                stringBuilder.append("ID: $id\n")
+                stringBuilder.append("Nome: $name\n")
+                stringBuilder.append("Telefone: $phone\n\n")
+            } while (cursor.moveToNext())
+
+            cursor.close()
+
+            if (stringBuilder.isNotEmpty()) {
+                Toast.makeText(
+                    this,
+                    stringBuilder.toString(),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
-
-        Toast.makeText(
-            this,
-            exit.toString(),
-            Toast.LENGTH_SHORT
-        ).show()
     }
 }
