@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -11,64 +10,70 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cod:" />
+        android:text="@string/cod" />
 
     <EditText
         android:id="@+id/etCod"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number" />
+        android:autofillHints=""
+        android:inputType="number"
+        tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintTextFieldSize" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nome:" />
+        android:text="@string/nome" />
 
     <EditText
         android:id="@+id/etNome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textCapWords" />
+        android:autofillHints=""
+        android:inputType="textCapWords"
+        tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintTextFieldSize" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Telefone:" />
+        android:text="@string/telefone" />
 
     <EditText
         android:id="@+id/etTelefone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="phone" />
+        android:autofillHints=""
+        android:inputType="phone"
+        tools:ignore="LabelFor,SpeakableTextPresentCheck,TouchTargetSizeCheck,VisualLintTextFieldSize" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="btnIncluirOnClick"
-        android:text="Incluir" />
+        android:onClick="btnInclusionClick"
+        android:text="@string/incluir" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="btnAlterarOnClick"
-        android:text="Alterar" />
+        android:onClick="btnUpdateOnClick"
+        android:text="@string/alterar" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="btnExcluirOnClick"
-        android:text="Excluir" />
+        android:onClick="btnDeleteOnClick"
+        android:text="@string/excluir" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="btnPesquisarOnClick"
-        android:text="Pesquisar" />
+        android:text="@string/pesquisar" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="btnListarOnClick"
-        android:text="Listar" />
+        android:text="@string/listar" />
 
 </LinearLayout>
